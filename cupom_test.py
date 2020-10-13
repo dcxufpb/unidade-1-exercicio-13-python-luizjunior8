@@ -2,11 +2,19 @@
 
 import cupom
 import pytest
+from datetime import datetime
+from cupom import Venda
 
 
 def verifica_campo_obrigatorio_objeto(mensagem_esperada, loja):
     with pytest.raises(Exception) as excinfo:
         loja.dados_loja()
+    the_exception = excinfo.value
+    assert mensagem_esperada == str(the_exception)
+
+def verifica_campo_obrigatorio_venda(mensagem_esperada, venda):
+    with pytest.raises(Exception) as excinfo:
+        venda.dados_venda()
     the_exception = excinfo.value
     assert mensagem_esperada == str(the_exception)
 
@@ -24,6 +32,9 @@ TELEFONE = "(11) 1111-1111"
 OBSERVACAO = "Obs 1"
 CNPJ = "11.111.111/1111-11"
 INSCRICAO_ESTADUAL = "123456789"
+DATA_HORA = datetime(2020,11,25,10,30,40)
+CCF = "123456"
+COO = "654321"
 
 ENDERECO_COMPLETO = cupom.Endereco(LOGRADOURO, NUMERO, COMPLEMENTO, BAIRRO,
                                    MUNICIPIO, ESTADO, CEP)
@@ -305,8 +316,9 @@ def test_valida_inscricao_estadual():
     verifica_campo_obrigatorio_objeto(
         "O campo inscrição estadual da loja é obrigatório", LOJA_IE_VAZIA)
 
-ENDERECO_SEM_NUMERO_SEM_COMPLEMENTO = cupom.Endereco(LOGRADOURO, 0, None, BAIRRO,
-                                   MUNICIPIO, ESTADO, CEP)
+ENDERECO_SEM_NUMERO_SEM_COMPLEMENTO = cupom.Endereco(LOGRADOURO, 0, None,
+                                                    BAIRRO, MUNICIPIO, ESTADO,
+                                                    CEP)
 
 LOJA_SEM_NUMERO_SEM_COMPLEMENTO = cupom.Loja(NOME_LOJA, ENDERECO_SEM_NUMERO_SEM_COMPLEMENTO,
                                              TELEFONE, OBSERVACAO, CNPJ,
@@ -325,8 +337,10 @@ def test_valida_numero_e_complemento():
     assert LOJA_SEM_NUMERO_SEM_COMPLEMENTO.dados_loja() == TEXTO_ESPERADO_SEM_NUMERO_SEM_COMPLEMENTO
 
 
-ENDERECO_SEM_NUMERO_SEM_COMPLEMENTO_SEM_BAIRRO = cupom.Endereco(LOGRADOURO, 0, None, None,
-                                   MUNICIPIO, ESTADO, CEP)
+ENDERECO_SEM_NUMERO_SEM_COMPLEMENTO_SEM_BAIRRO = cupom.Endereco(LOGRADOURO, 0, None,
+                                                    None, MUNICIPIO, ESTADO,
+                                                    CEP)
+
 LOJA_SEM_NUMERO_SEM_COMPLEMENTO_SEM_BAIRRO = cupom.Loja(NOME_LOJA, 
                                                         ENDERECO_SEM_NUMERO_SEM_COMPLEMENTO_SEM_BAIRRO, 
                                                         TELEFONE, OBSERVACAO,
@@ -345,22 +359,49 @@ IE: 123456789'''
 def test_valida_numero_complemento_e_bairro():
     assert LOJA_SEM_NUMERO_SEM_COMPLEMENTO_SEM_BAIRRO.dados_loja() == TEXTO_ESPERADO_SEM_NUMERO_SEM_COMPLEMENTO_SEM_BAIRRO
 
+VENDA_SEM_CCF = cupom.Venda (LOJA_COMPLETA, DATA_HORA, 0, COO)
+
+def test_valida_ccf():
+    verifica_campo_obrigatorio_venda(
+        "O campo ccf é obrigatório", VENDA_SEM_CCF)
+
+VENDA_SEM_COO = cupom.Venda (LOJA_COMPLETA, DATA_HORA, CCF, 0)
+
+def test_valida_coo():
+    verifica_campo_obrigatorio_venda(
+        "O campo coo é obrigatório", VENDA_SEM_COO)
+
+VENDA_SEM_DATA_HORA = cupom.Venda (LOJA_COMPLETA, "", CCF, COO)
+
+def test_valida_data_hora():
+    verifica_campo_obrigatorio_venda(
+        "Data e hora são obrigatórios", VENDA_SEM_DATA_HORA)
+
+
+TEXTO_ESPERADO_TEST_EXERCICIO2_CUSTOMIZADO = """Jr Tech
+Rua Geraldo Correia de Melo, 100 Casa
+Centro - Araçagi - PB
+CEP:58270-000 Tel (83) 98111-2697
+Matriz
+CNPJ: 66.651.293/0001-85
+IE: 222.333.444.555"""
+
 
 def test_exercicio2_customizado():
 
     # Defina seus próprios valores para as variáveis a seguir
-    nome_loja = ""
-    logradouro = ""
-    numero = 0
-    complemento = ""
-    bairro = ""
-    municipio = ""
-    estado = ""
-    cep = ""
-    telefone = ""
-    observacao = ""
-    cnpj = ""
-    inscricao_estadual = ""
+    nome_loja = "Jr Tech"
+    logradouro = "Rua Geraldo Correia de Melo"
+    numero = 100
+    complemento = "Casa"
+    bairro = "Centro"
+    municipio = "Araçagi"
+    estado = "PB"
+    cep = "58270-000"
+    telefone = "(83) 98111-2697"
+    observacao = "Matriz"
+    cnpj = "66.651.293/0001-85"
+    inscricao_estadual = "222.333.444.555"
 
     endereco_customizado = cupom.Endereco(logradouro, numero, complemento,
                                  bairro, municipio, estado, cep)
@@ -368,5 +409,4 @@ def test_exercicio2_customizado():
                                  observacao, cnpj, inscricao_estadual)
 
     # E atualize o texto esperado abaixo
-    assert (loja_customizada.dados_loja() == """
-""")
+    assert (loja_customizada.dados_loja() == TEXTO_ESPERADO_TEST_EXERCICIO2_CUSTOMIZADO)
