@@ -125,5 +125,4 @@ class Loja:
 {texto_endereco}{telefone}
 {observacao}
 {cnpj}
-{inscricao_estadual}""")
-     
+{inscricao_estadual}""")     
